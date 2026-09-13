@@ -1,0 +1,412 @@
+--// AIM + ESP
+--// Script.lua
+--// Подходит для выполнения через любой инжектор/эксплоит
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+
+local LP = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+--==================================================
+-- SETTINGS
+--==================================================
+
+local S = {
+	Aim = {
+		Enabled = false,
+		FOV = 180,
+		FOVColor = Color3.fromRGB(255,60,60),
+		Smoothness = 0.18,
+		MaxDistance = 1000,
+		TargetPart = "Head",
+		TeamCheck = true,
+		WallCheck = false,
+		Sticky = true,
+		Priority = "Center"
+	},
+
+	ESP = {
+		Enabled = false,
+		Name = true,
+		Health = true,
+		MaxDistance = 1500,
+		Color = Color3.fromRGB(255,60,60),
+		Rainbow = false
+	},
+
+	UI = {
+		MenuColor = Color3.fromRGB(18,18,23),
+		ButtonColor = Color3.fromRGB(28,28,34),
+		TopColor = Color3.fromRGB(25,25,31)
+	}
+}
+
+--==================================================
+-- COLORS
+--==================================================
+
+local Colors = {
+	RED = Color3.fromRGB(255,60,60),
+	ORANGE = Color3.fromRGB(255,140,40),
+	YELLOW = Color3.fromRGB(255,230,50),
+	LIME = Color3.fromRGB(150,255,50),
+	GREEN = Color3.fromRGB(50,220,100),
+	CYAN = Color3.fromRGB(40,240,240),
+	BLUE = Color3.fromRGB(60,130,255),
+	PURPLE = Color3.fromRGB(160,80,255),
+	PINK = Color3.fromRGB(255,70,180),
+	WHITE = Color3.fromRGB(255,255,255),
+	GOLD = Color3.fromRGB(255,190,40),
+	MAGENTA = Color3.fromRGB(255,40,255)
+}
+
+local ColorNames = {
+	"RED", "ORANGE", "YELLOW", "LIME", "GREEN", "CYAN", 
+	"BLUE", "PURPLE", "PINK", "WHITE", "GOLD", "MAGENTA"
+}
+--==================================================
+-- GUI
+--==================================================
+
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "AimESP_UI"
+Gui.ResetOnSpawn = false
+Gui.IgnoreGuiInset = true
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Gui.Parent = LP:WaitForChild("PlayerGui")
+
+--==================================================
+-- OPEN BUTTON
+--==================================================
+
+local Open = Instance.new("TextButton")
+Open.Size = UDim2.fromOffset(50,42)
+Open.Position = UDim2.new(0,15,.5,-21)
+Open.BackgroundColor3 = S.UI.ButtonColor
+Open.Text = "вова"
+Open.TextColor3 = Color3.fromRGB(255,255,255)
+Open.TextSize = 11
+Open.Font = Enum.Font.GothamBold
+Open.AutoButtonColor = false
+Open.Parent = Gui
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(0,9)
+OpenCorner.Parent = Open
+
+local OpenStroke = Instance.new("UIStroke")
+OpenStroke.Color = Color3.fromRGB(80,80,90)
+OpenStroke.Thickness = 1
+OpenStroke.Parent = Open
+
+--==================================================
+-- MAIN MENU
+--==================================================
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.fromOffset(340,275)
+Main.Position = UDim2.new(.5,-170,.5,-137)
+Main.BackgroundColor3 = S.UI.MenuColor
+Main.Visible = true
+Main.Parent = Gui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0,12)
+MainCorner.Parent = Main
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(55,55,65)
+MainStroke.Thickness = 1
+MainStroke.Parent = Main
+
+--==================================================
+-- TOP BAR
+--==================================================
+
+local Top = Instance.new("Frame")
+Top.Size = UDim2.new(1,0,0,42)
+Top.BackgroundColor3 = S.UI.TopColor
+Top.Parent = Main
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0,12)
+TopCorner.Parent = Top
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1,-50,1,0)
+Title.Position = UDim2.fromOffset(13,0)
+Title.BackgroundTransparency = 1
+Title.Text = "AIM  •  ESP"
+Title.TextColor3 = Color3.fromRGB(245,245,250)
+Title.TextSize = 15
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Top
+
+local Close = Instance.new("TextButton")
+Close.Size = UDim2.fromOffset(35,35)
+Close.Position = UDim2.new(1,-39,0,4)
+Close.BackgroundTransparency = 1
+Close.Text = "×"
+Close.TextColor3 = Color3.fromRGB(180,180,190)
+Close.TextSize = 24
+Close.Font = Enum.Font.Gotham
+Close.Parent = Top
+
+Close.Activated:Connect(function()
+	Main.Visible = false
+end)
+
+Open.Activated:Connect(function()
+	Main.Visible = not Main.Visible
+end)
+--==================================================
+-- TABS
+--==================================================
+
+local Tabs = Instance.new("Frame")
+Tabs.Size = UDim2.new(1,-20,0,34)
+Tabs.Position = UDim2.fromOffset(10,47)
+Tabs.BackgroundTransparency = 1
+Tabs.Parent = Main
+
+local TabLayout = Instance.new("UIListLayout")
+TabLayout.FillDirection = Enum.FillDirection.Horizontal
+TabLayout.Padding = UDim.new(0,5)
+TabLayout.Parent = Tabs
+
+local function CreateTab(text)
+	local B = Instance.new("TextButton")
+	B.Size = UDim2.new(0,100,1,0)
+	B.BackgroundColor3 = S.UI.ButtonColor
+	B.Text = text
+	B.TextColor3 = Color3.fromRGB(175,175,185)
+	B.TextSize = 12
+	B.Font = Enum.Font.GothamBold
+	B.AutoButtonColor = false
+	B.Parent = Tabs
+
+	local C = Instance.new("UICorner")
+	C.CornerRadius = UDim.new(0,7)
+	C.Parent = B
+
+	return B
+end
+
+local AimTab = CreateTab("AIM")
+local EspTab = CreateTab("ESP")
+local SettingTab = CreateTab("SETTING")
+
+--==================================================
+-- PAGES
+--==================================================
+
+local Content = Instance.new("Frame")
+Content.Size = UDim2.new(1,-20,1,-90)
+Content.Position = UDim2.fromOffset(10,86)
+Content.BackgroundTransparency = 1
+Content.Parent = Main
+
+local Pages = {}
+
+local function CreatePage()
+	local P = Instance.new("ScrollingFrame")
+	P.Size = UDim2.new(1,0,1,0)
+	P.BackgroundTransparency = 1
+	P.BorderSizePixel = 0
+	P.ScrollBarThickness = 3
+	P.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	P.CanvasSize = UDim2.new()
+	P.ScrollingDirection = Enum.ScrollingDirection.Y
+	P.Visible = false
+	P.Parent = Content
+
+	local L = Instance.new("UIListLayout")
+	L.Padding = UDim.new(0,6)
+	L.Parent = P
+
+	return P
+end
+
+Pages.AIM = CreatePage()
+Pages.ESP = CreatePage()
+Pages.SETTING = CreatePage()
+
+local function SwitchPage(name)
+	for n,p in pairs(Pages) do
+		p.Visible = n == name
+	end
+
+	AimTab.BackgroundColor3 = name == "AIM" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
+	EspTab.BackgroundColor3 = name == "ESP" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
+	SettingTab.BackgroundColor3 = name == "SETTING" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
+end
+
+AimTab.Activated:Connect(function() SwitchPage("AIM") end)
+EspTab.Activated:Connect(function() SwitchPage("ESP") end)
+SettingTab.Activated:Connect(function() SwitchPage("SETTING") end)
+
+--==================================================
+-- CONTROLS
+--==================================================
+
+local function Button(parent,text)
+	local B = Instance.new("TextButton")
+	B.Size = UDim2.new(1,0,0,34)
+	B.BackgroundColor3 = S.UI.ButtonColor
+	B.Text = text
+	B.TextColor3 = Color3.fromRGB(225,225,230)
+	B.TextSize = 11
+	B.Font = Enum.Font.GothamMedium
+	B.AutoButtonColor = false
+	B.Parent = parent
+
+	local C = Instance.new("UICorner")
+	C.CornerRadius = UDim.new(0,7)
+	C.Parent = B
+
+	return B
+end
+
+local function Toggle(parent,text,value,callback)
+	local B = Button(parent,text..": "..(value and "ON" or "OFF"))
+	B.Activated:Connect(function()
+		value = not value
+		B.Text = text..": "..(value and "ON" or "OFF")
+		callback(value)
+	end)
+	return B
+end
+
+local function Cycle(parent,text,values,index,callback)
+	local B = Button(parent,text..": "..tostring(values[index]))
+	B.Activated:Connect(function()
+		index = index + 1
+		if index > #values then index = 1 end
+		B.Text = text..": "..tostring(values[index])
+		callback(values[index])
+	end)
+	return B
+end
+
+--==================================================
+-- UI SETTINGS SETUP
+--==================================================
+
+Toggle(Pages.AIM, "AIM", S.Aim.Enabled, function(v) S.Aim.Enabled = v end)
+Cycle(Pages.AIM, "FOV", {50,75,100,125,150,180,225,275,350,450,600}, 6, function(v) S.Aim.FOV = v end)
+Cycle(Pages.AIM, "FOV Color", ColorNames, 1, function(v) S.Aim.FOVColor = Colors[v] end)
+Cycle(Pages.AIM, "Smoothness", {0.05, 0.1, 0.15, 0.18, 0.25, 0.35, 0.5}, 4, function(v) S.Aim.Smoothness = v end)
+Cycle(Pages.AIM, "Target Part", {"Head", "HumanoidRootPart"}, 1, function(v) S.Aim.TargetPart = v end)
+Toggle(Pages.AIM, "Team Check", S.Aim.TeamCheck, function(v) S.Aim.TeamCheck = v end)
+Toggle(Pages.AIM, "Wall Check", S.Aim.WallCheck, function(v) S.Aim.WallCheck = v end)
+
+Toggle(Pages.ESP, "ESP Enabled", S.ESP.Enabled, function(v) S.ESP.Enabled = v end)
+Toggle(Pages.ESP, "Show Names", S.ESP.Name, function(v) S.ESP.Name = v end)
+Toggle(Pages.ESP, "Show Health", S.ESP.Health, function(v) S.ESP.Health = v end)
+Cycle(Pages.ESP, "ESP Color", ColorNames, 1, function(v) S.ESP.Color = Colors[v] end)
+Toggle(Pages.ESP, "Rainbow ESP", S.ESP.Rainbow, function(v) S.ESP.Rainbow = v end)
+
+SwitchPage("AIM")
+--==================================================
+-- FOV RING & LOGIC
+--==================================================
+
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 1
+FOVCircle.Filled = false
+FOVCircle.Transparency = 1
+
+local function GetClosestPlayer()
+	local Target = nil
+	local ShortestDistance = math.huge
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LP and player.Character and player.Character:FindFirstChild(S.Aim.TargetPart) and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+			if S.Aim.TeamCheck and player.Team == LP.Team then continue end
+			
+			local Part = player.Character[S.Aim.TargetPart]
+			local Pos, OnScreen = Camera:WorldToViewportPoint(Part.Position)
+			
+			if OnScreen then
+				local Distance = (Vector2.new(Pos.X, Pos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+				if Distance <= S.Aim.FOV and Distance < ShortestDistance then
+					if S.Aim.WallCheck then
+						local RaycastParamsObj = RaycastParams.new()
+						RaycastParamsObj.FilterType = Enum.RaycastFilterType.Exclude
+						RaycastParamsObj.FilterDescendantsInstances = {LP.Character, player.Character}
+						local RaycastResult = workspace:Raycast(Camera.CFrame.Position, Part.Position - Camera.CFrame.Position, RaycastParamsObj)
+						if RaycastResult then continue end
+					end
+					ShortestDistance = Distance
+					Target = Part
+				end
+			end
+		end
+	end
+	return Target
+end
+
+--==================================================
+-- MAIN LOOP (ESP + AIM FUNCTION)
+--==================================================
+
+local HighlightStorage = {}
+
+RunService.RenderStepped:Connect(function()
+	-- Обновление FOV кольца
+	FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+	FOVCircle.Radius = S.Aim.FOV
+	FOVCircle.Color = S.Aim.FOVColor
+	FOVCircle.Visible = S.Aim.Enabled
+
+	-- Логика Аима
+	if S.Aim.Enabled and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+		local Target = GetClosestPlayer()
+		if Target then
+			local TargetPos = Camera:WorldToViewportPoint(Target.Position)
+			local MousePos = UIS:GetMouseLocation()
+			Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, Target.Position), S.Aim.Smoothness)
+		end
+	end
+
+	-- Логика ESP
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LP and player.Character then
+			local char = player.Character
+			if S.ESP.Enabled then
+				if S.Aim.TeamCheck and player.Team == LP.Team then
+					if HighlightStorage[player] then HighlightStorage[player]:Destroy() HighlightStorage[player] = nil end
+					continue
+				end
+				
+				local highlight = HighlightStorage[player]
+				if not highlight then
+					highlight = Instance.new("Highlight")
+					highlight.Parent = char
+					HighlightStorage[player] = highlight
+				end
+				
+				highlight.FillColor = S.ESP.Rainbow and Color3.fromHSV(tick() % 5 / 5, 1, 1) or S.ESP.Color
+				highlight.OutlineColor = Color3.new(1,1,1)
+				highlight.FillTransparency = 0.5
+				highlight.OutlineTransparency = 0
+			else
+				if HighlightStorage[player] then
+					HighlightStorage[player]:Destroy()
+					HighlightStorage[player] = nil
+				end
+			end
+		end
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	if HighlightStorage[player] then
+		HighlightStorage[player]:Destroy()
+		HighlightStorage[player] = nil
+	end
+end)
+
