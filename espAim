@@ -1,17 +1,9 @@
---// AIM + ESP
---// Script.lua
---// Подходит для выполнения через любой инжектор/эксплоит
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 
 local LP = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-
---==================================================
--- SETTINGS
---==================================================
 
 local S = {
 	Aim = {
@@ -43,10 +35,6 @@ local S = {
 	}
 }
 
---==================================================
--- COLORS
---==================================================
-
 local Colors = {
 	RED = Color3.fromRGB(255,60,60),
 	ORANGE = Color3.fromRGB(255,140,40),
@@ -63,12 +51,9 @@ local Colors = {
 }
 
 local ColorNames = {
-	"RED", "ORANGE", "YELLOW", "LIME", "GREEN", "CYAN", 
-	"BLUE", "PURPLE", "PINK", "WHITE", "GOLD", "MAGENTA"
+	"RED","ORANGE","YELLOW","LIME","GREEN","CYAN",
+	"BLUE","PURPLE","PINK","WHITE","GOLD","MAGENTA"
 }
---==================================================
--- GUI
---==================================================
 
 local Gui = Instance.new("ScreenGui")
 Gui.Name = "AimESP_UI"
@@ -76,10 +61,6 @@ Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 Gui.Parent = LP:WaitForChild("PlayerGui")
-
---==================================================
--- OPEN BUTTON
---==================================================
 
 local Open = Instance.new("TextButton")
 Open.Size = UDim2.fromOffset(50,42)
@@ -101,10 +82,6 @@ OpenStroke.Color = Color3.fromRGB(80,80,90)
 OpenStroke.Thickness = 1
 OpenStroke.Parent = Open
 
---==================================================
--- MAIN MENU
---==================================================
-
 local Main = Instance.new("Frame")
 Main.Size = UDim2.fromOffset(340,275)
 Main.Position = UDim2.new(.5,-170,.5,-137)
@@ -120,10 +97,6 @@ local MainStroke = Instance.new("UIStroke")
 MainStroke.Color = Color3.fromRGB(55,55,65)
 MainStroke.Thickness = 1
 MainStroke.Parent = Main
-
---==================================================
--- TOP BAR
---==================================================
 
 local Top = Instance.new("Frame")
 Top.Size = UDim2.new(1,0,0,42)
@@ -162,9 +135,6 @@ end)
 Open.Activated:Connect(function()
 	Main.Visible = not Main.Visible
 end)
---==================================================
--- TABS
---==================================================
 
 local Tabs = Instance.new("Frame")
 Tabs.Size = UDim2.new(1,-20,0,34)
@@ -199,10 +169,6 @@ local AimTab = CreateTab("AIM")
 local EspTab = CreateTab("ESP")
 local SettingTab = CreateTab("SETTING")
 
---==================================================
--- PAGES
---==================================================
-
 local Content = Instance.new("Frame")
 Content.Size = UDim2.new(1,-20,1,-90)
 Content.Position = UDim2.fromOffset(10,86)
@@ -213,7 +179,7 @@ local Pages = {}
 
 local function CreatePage()
 	local P = Instance.new("ScrollingFrame")
-	P.Size = UDim2.new(1,0,1,0)
+	P.Size = UDim2.fromScale(1,1)
 	P.BackgroundTransparency = 1
 	P.BorderSizePixel = 0
 	P.ScrollBarThickness = 3
@@ -239,18 +205,27 @@ local function SwitchPage(name)
 		p.Visible = n == name
 	end
 
-	AimTab.BackgroundColor3 = name == "AIM" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
-	EspTab.BackgroundColor3 = name == "ESP" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
-	SettingTab.BackgroundColor3 = name == "SETTING" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
+	AimTab.BackgroundColor3 =
+		name == "AIM" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
+
+	EspTab.BackgroundColor3 =
+		name == "ESP" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
+
+	SettingTab.BackgroundColor3 =
+		name == "SETTING" and Color3.fromRGB(65,65,80) or S.UI.ButtonColor
 end
 
-AimTab.Activated:Connect(function() SwitchPage("AIM") end)
-EspTab.Activated:Connect(function() SwitchPage("ESP") end)
-SettingTab.Activated:Connect(function() SwitchPage("SETTING") end)
+AimTab.Activated:Connect(function()
+	SwitchPage("AIM")
+end)
 
---==================================================
--- CONTROLS
---==================================================
+EspTab.Activated:Connect(function()
+	SwitchPage("ESP")
+end)
+
+SettingTab.Activated:Connect(function()
+	SwitchPage("SETTING")
+end)
 
 local function Button(parent,text)
 	local B = Instance.new("TextButton")
@@ -272,141 +247,596 @@ end
 
 local function Toggle(parent,text,value,callback)
 	local B = Button(parent,text..": "..(value and "ON" or "OFF"))
+
 	B.Activated:Connect(function()
 		value = not value
 		B.Text = text..": "..(value and "ON" or "OFF")
 		callback(value)
 	end)
+
 	return B
 end
 
 local function Cycle(parent,text,values,index,callback)
 	local B = Button(parent,text..": "..tostring(values[index]))
+
 	B.Activated:Connect(function()
-		index = index + 1
-		if index > #values then index = 1 end
+		index += 1
+
+		if index > #values then
+			index = 1
+		end
+
 		B.Text = text..": "..tostring(values[index])
 		callback(values[index])
 	end)
+
 	return B
 end
 
---==================================================
--- UI SETTINGS SETUP
---==================================================
+Toggle(Pages.AIM,"AIM",S.Aim.Enabled,function(v)
+	S.Aim.Enabled = v
+end)
 
-Toggle(Pages.AIM, "AIM", S.Aim.Enabled, function(v) S.Aim.Enabled = v end)
-Cycle(Pages.AIM, "FOV", {50,75,100,125,150,180,225,275,350,450,600}, 6, function(v) S.Aim.FOV = v end)
-Cycle(Pages.AIM, "FOV Color", ColorNames, 1, function(v) S.Aim.FOVColor = Colors[v] end)
-Cycle(Pages.AIM, "Smoothness", {0.05, 0.1, 0.15, 0.18, 0.25, 0.35, 0.5}, 4, function(v) S.Aim.Smoothness = v end)
-Cycle(Pages.AIM, "Target Part", {"Head", "HumanoidRootPart"}, 1, function(v) S.Aim.TargetPart = v end)
-Toggle(Pages.AIM, "Team Check", S.Aim.TeamCheck, function(v) S.Aim.TeamCheck = v end)
-Toggle(Pages.AIM, "Wall Check", S.Aim.WallCheck, function(v) S.Aim.WallCheck = v end)
+Cycle(Pages.AIM,"FOV",
+	{50,75,100,125,150,180,225,275,350,450,600},
+	6,function(v)
+		S.Aim.FOV = v
+	end
+)
 
-Toggle(Pages.ESP, "ESP Enabled", S.ESP.Enabled, function(v) S.ESP.Enabled = v end)
-Toggle(Pages.ESP, "Show Names", S.ESP.Name, function(v) S.ESP.Name = v end)
-Toggle(Pages.ESP, "Show Health", S.ESP.Health, function(v) S.ESP.Health = v end)
-Cycle(Pages.ESP, "ESP Color", ColorNames, 1, function(v) S.ESP.Color = Colors[v] end)
-Toggle(Pages.ESP, "Rainbow ESP", S.ESP.Rainbow, function(v) S.ESP.Rainbow = v end)
+Cycle(Pages.AIM,"FOV Color",ColorNames,1,function(v)
+	S.Aim.FOVColor = Colors[v]
+end)
 
-SwitchPage("AIM")
---==================================================
--- FOV RING & LOGIC
---==================================================
+Cycle(Pages.AIM,"Smoothness",
+	{"5%","10%","15%","20%","30%","40%","50%","70%","100%"},
+	4,function(v)
+		local n = tonumber(v:match("%d+"))
+		S.Aim.Smoothness = math.clamp(n/100,.05,.82)
+	end
+)
 
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Thickness = 1
-FOVCircle.Filled = false
-FOVCircle.Transparency = 1
+Cycle(Pages.AIM,"Max Distance",
+	{100,250,500,750,1000,1500,2000,3000},
+	5,function(v)
+		S.Aim.MaxDistance = v
+	end
+)
 
-local function GetClosestPlayer()
-	local Target = nil
-	local ShortestDistance = math.huge
+Cycle(Pages.AIM,"Target",
+	{"Head","HumanoidRootPart"},1,function(v)
+		S.Aim.TargetPart = v
+	end
+)
 
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LP and player.Character and player.Character:FindFirstChild(S.Aim.TargetPart) and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
-			if S.Aim.TeamCheck and player.Team == LP.Team then continue end
-			
-			local Part = player.Character[S.Aim.TargetPart]
-			local Pos, OnScreen = Camera:WorldToViewportPoint(Part.Position)
-			
-			if OnScreen then
-				local Distance = (Vector2.new(Pos.X, Pos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
-				if Distance <= S.Aim.FOV and Distance < ShortestDistance then
-					if S.Aim.WallCheck then
-						local RaycastParamsObj = RaycastParams.new()
-						RaycastParamsObj.FilterType = Enum.RaycastFilterType.Exclude
-						RaycastParamsObj.FilterDescendantsInstances = {LP.Character, player.Character}
-						local RaycastResult = workspace:Raycast(Camera.CFrame.Position, Part.Position - Camera.CFrame.Position, RaycastParamsObj)
-						if RaycastResult then continue end
-					end
-					ShortestDistance = Distance
-					Target = Part
-				end
-			end
+Toggle(Pages.AIM,"Team Check",S.Aim.TeamCheck,function(v)
+	S.Aim.TeamCheck = v
+end)
+
+Toggle(Pages.AIM,"Wall Check",S.Aim.WallCheck,function(v)
+	S.Aim.WallCheck = v
+end)
+
+Toggle(Pages.AIM,"Sticky Target",S.Aim.Sticky,function(v)
+	S.Aim.Sticky = v
+end)
+
+Cycle(Pages.AIM,"Priority",
+	{"Center","Distance"},1,function(v)
+		S.Aim.Priority = v
+	end
+)
+
+Toggle(Pages.ESP,"ESP",S.ESP.Enabled,function(v)
+	S.ESP.Enabled = v
+end)
+
+Toggle(Pages.ESP,"Name",S.ESP.Name,function(v)
+	S.ESP.Name = v
+end)
+
+Toggle(Pages.ESP,"Health",S.ESP.Health,function(v)
+	S.ESP.Health = v
+end)
+
+Cycle(Pages.ESP,"ESP Distance",
+	{100,250,500,750,1000,1500,2000,3000},
+	6,function(v)
+		S.ESP.MaxDistance = v
+	end
+)
+
+Cycle(Pages.ESP,"ESP Color",ColorNames,1,function(v)
+	S.ESP.Color = Colors[v]
+end)
+
+Toggle(Pages.ESP,"Rainbow ESP",S.ESP.Rainbow,function(v)
+	S.ESP.Rainbow = v
+end)
+
+Cycle(Pages.SETTING,"Menu Color",
+	{"DARK","LIGHT","BLUE","PURPLE","RED"},1,function(v)
+		if v == "DARK" then
+			S.UI.MenuColor = Color3.fromRGB(18,18,23)
+		elseif v == "LIGHT" then
+			S.UI.MenuColor = Color3.fromRGB(38,38,45)
+		elseif v == "BLUE" then
+			S.UI.MenuColor = Color3.fromRGB(18,24,40)
+		elseif v == "PURPLE" then
+			S.UI.MenuColor = Color3.fromRGB(28,20,40)
+		elseif v == "RED" then
+			S.UI.MenuColor = Color3.fromRGB(40,20,22)
 		end
 	end
-	return Target
+)
+
+Cycle(Pages.SETTING,"Button Color",
+	{"DARK","BLUE","PURPLE","RED","GREEN","ORANGE"},1,function(v)
+		if v == "DARK" then
+			S.UI.ButtonColor = Color3.fromRGB(28,28,34)
+		else
+			S.UI.ButtonColor = Colors[v]
+		end
+	end
+)
+
+Cycle(Pages.SETTING,"Top Color",
+	{"DARK","BLUE","PURPLE","RED","GREEN"},1,function(v)
+		if v == "DARK" then
+			S.UI.TopColor = Color3.fromRGB(25,25,31)
+		else
+			S.UI.TopColor = Colors[v]
+		end
+	end
+)
+
+local FOVCircle = Instance.new("Frame")
+FOVCircle.AnchorPoint = Vector2.new(.5,.5)
+FOVCircle.BackgroundTransparency = 1
+FOVCircle.Visible = false
+FOVCircle.ZIndex = 1
+FOVCircle.Parent = Gui
+
+local FOVCorner = Instance.new("UICorner")
+FOVCorner.CornerRadius = UDim.new(1,0)
+FOVCorner.Parent = FOVCircle
+
+local FOVStroke = Instance.new("UIStroke")
+FOVStroke.Thickness = 1
+FOVStroke.Transparency = .4
+FOVStroke.Parent = FOVCircle
+
+local ESPObjects = {}
+
+local function RemoveESP(player)
+	local data = ESPObjects[player]
+
+	if not data then
+		return
+	end
+
+	if data.Highlight then
+		data.Highlight:Destroy()
+	end
+
+	if data.Billboard then
+		data.Billboard:Destroy()
+	end
+
+	if data.Beam then
+		data.Beam:Destroy()
+	end
+
+	if data.TargetAttachment then
+		data.TargetAttachment:Destroy()
+	end
+
+	ESPObjects[player] = nil
 end
 
---==================================================
--- MAIN LOOP (ESP + AIM FUNCTION)
---==================================================
+local function CreateESP(player)
+	if player == LP or ESPObjects[player] then
+		return
+	end
 
-local HighlightStorage = {}
+	local Highlight = Instance.new("Highlight")
+	Highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	Highlight.FillTransparency = .82
+	Highlight.OutlineTransparency = .55
+	Highlight.Parent = Gui
 
-RunService.RenderStepped:Connect(function()
-	-- Обновление FOV кольца
-	FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-	FOVCircle.Radius = S.Aim.FOV
-	FOVCircle.Color = S.Aim.FOVColor
-	FOVCircle.Visible = S.Aim.Enabled
+	local Billboard = Instance.new("BillboardGui")
+	Billboard.Size = UDim2.fromOffset(150,45)
+	Billboard.StudsOffset = Vector3.new(0,3,0)
+	Billboard.AlwaysOnTop = true
+	Billboard.Parent = Gui
 
-	-- Логика Аима
-	if S.Aim.Enabled and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-		local Target = GetClosestPlayer()
-		if Target then
-			local TargetPos = Camera:WorldToViewportPoint(Target.Position)
-			local MousePos = UIS:GetMouseLocation()
-			Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, Target.Position), S.Aim.Smoothness)
+	local Text = Instance.new("TextLabel")
+	Text.Size = UDim2.fromScale(1,1)
+	Text.BackgroundTransparency = 1
+	Text.TextSize = 11
+	Text.TextStrokeTransparency = .5
+	Text.Font = Enum.Font.GothamBold
+	Text.Parent = Billboard
+
+	local TargetAttachment = Instance.new("Attachment")
+	TargetAttachment.Name = "ESP_Target"
+	TargetAttachment.Parent = workspace.Terrain
+
+	local Beam = Instance.new("Beam")
+	Beam.Attachment0 = nil
+	Beam.Attachment1 = TargetAttachment
+	Beam.Width0 = .025
+	Beam.Width1 = .025
+	Beam.FaceCamera = true
+	Beam.LightEmission = 1
+	Beam.Transparency = NumberSequence.new(.15)
+	Beam.Parent = workspace.Terrain
+
+	ESPObjects[player] = {
+		Highlight = Highlight,
+		Billboard = Billboard,
+		Text = Text,
+		Beam = Beam,
+		TargetAttachment = TargetAttachment
+	}
+end
+
+local function RainbowColor()
+	return Color3.fromHSV((tick()*.18)%1,1,1)
+end
+
+local function UpdateESP(player,data)
+	local character = player.Character
+
+	if not character then
+		data.Highlight.Enabled = false
+		data.Billboard.Enabled = false
+		data.Beam.Enabled = false
+		return
+	end
+
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local hum = character:FindFirstChildOfClass("Humanoid")
+	local myCharacter = LP.Character
+	local myRoot = myCharacter and myCharacter:FindFirstChild("HumanoidRootPart")
+
+	if not root or not hum or not myRoot then
+		data.Highlight.Enabled = false
+		data.Billboard.Enabled = false
+		data.Beam.Enabled = false
+		return
+	end
+
+	if hum.Health <= 0 then
+		data.Highlight.Enabled = false
+		data.Billboard.Enabled = false
+		data.Beam.Enabled = false
+		return
+	end
+
+	local distance = (myRoot.Position-root.Position).Magnitude
+
+	if distance > S.ESP.MaxDistance or not S.ESP.Enabled then
+		data.Highlight.Enabled = false
+		data.Billboard.Enabled = false
+		data.Beam.Enabled = false
+		return
+	end
+
+	local Color = S.ESP.Rainbow and RainbowColor() or S.ESP.Color
+
+	data.Highlight.Enabled = true
+	data.Highlight.Adornee = character
+	data.Highlight.FillColor = Color
+	data.Highlight.OutlineColor = Color
+
+	data.Billboard.Enabled = true
+	data.Billboard.Adornee = root
+
+	local text = ""
+
+	if S.ESP.Name then
+		text = player.DisplayName
+	end
+
+	if S.ESP.Health then
+		text = text .. (text ~= "" and "  " or "") .. "HP: " .. math.floor(hum.Health)
+	end
+
+	data.Text.Text = text
+	data.Text.TextColor3 = Color
+
+	data.Beam.Enabled = true
+	data.TargetAttachment.WorldPosition = root.Position
+
+	local myAttachment = myRoot:FindFirstChild("ESP_MyAttachment")
+
+	if not myAttachment then
+		myAttachment = Instance.new("Attachment")
+		myAttachment.Name = "ESP_MyAttachment"
+		myAttachment.Parent = myRoot
+	end
+
+	data.Beam.Attachment0 = myAttachment
+	data.Beam.Attachment1 = data.TargetAttachment
+	data.Beam.Color = ColorSequence.new(Color)
+end
+
+local CurrentTarget = nil
+
+local function IsAlive(character)
+	local hum = character and character:FindFirstChildOfClass("Humanoid")
+	return hum and hum.Health > 0
+end
+
+local function GetPart(character)
+	if not character then
+		return nil
+	end
+
+	local part = character:FindFirstChild(S.Aim.TargetPart)
+
+	if part and part:IsA("BasePart") then
+		return part
+	end
+
+	return character:FindFirstChild("HumanoidRootPart")
+end
+
+local function IsVisible(part)
+	if not S.Aim.WallCheck then
+		return true
+	end
+
+	local origin = Camera.CFrame.Position
+	local direction = part.Position-origin
+
+	local Params = RaycastParams.new()
+	Params.FilterType = Enum.RaycastFilterType.Exclude
+	Params.FilterDescendantsInstances = {LP.Character}
+
+	local Result = workspace:Raycast(origin,direction,Params)
+
+	if not Result then
+		return true
+	end
+
+	return Result.Instance:IsDescendantOf(part.Parent)
+end
+
+local function ValidPlayer(player)
+	if player == LP then
+		return false
+	end
+
+	local character = player.Character
+
+	if not character or not IsAlive(character) then
+		return false
+	end
+
+	if S.Aim.TeamCheck and player.Team == LP.Team then
+		return false
+	end
+
+	local part = GetPart(character)
+
+	if not part then
+		return false
+	end
+
+	local distance = (Camera.CFrame.Position-part.Position).Magnitude
+
+	if distance > S.Aim.MaxDistance then
+		return false
+	end
+
+	if not IsVisible(part) then
+		return false
+	end
+
+	local screenPos,onScreen = Camera:WorldToViewportPoint(part.Position)
+
+	if not onScreen then
+		return false
+	end
+
+	local center = Vector2.new(
+		Camera.ViewportSize.X/2,
+		Camera.ViewportSize.Y/2
+	)
+
+	local point = Vector2.new(screenPos.X,screenPos.Y)
+	local screenDistance = (point-center).Magnitude
+
+	if screenDistance > S.Aim.FOV then
+		return false
+	end
+
+	return true,part,screenDistance,distance
+end
+
+local function FindTarget()
+	local best = nil
+	local bestScore = math.huge
+
+	for _,player in ipairs(Players:GetPlayers()) do
+		local valid,part,screenDist,worldDist = ValidPlayer(player)
+
+		if valid then
+			local score
+
+			if S.Aim.Priority == "Distance" then
+				score = worldDist
+			else
+				score = screenDist
+			end
+
+			if score < bestScore then
+				bestScore = score
+				best = player
+			end
 		end
 	end
 
-	-- Логика ESP
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LP and player.Character then
-			local char = player.Character
-			if S.ESP.Enabled then
-				if S.Aim.TeamCheck and player.Team == LP.Team then
-					if HighlightStorage[player] then HighlightStorage[player]:Destroy() HighlightStorage[player] = nil end
-					continue
+	return best
+end
+
+RunService:BindToRenderStep(
+	"AIM_CAMERA",
+	Enum.RenderPriority.Camera.Value + 2,
+	function()
+		Camera = workspace.CurrentCamera
+
+		FOVCircle.Position = UDim2.fromOffset(
+			Camera.ViewportSize.X/2,
+			Camera.ViewportSize.Y/2
+		)
+
+		FOVCircle.Size = UDim2.fromOffset(
+			S.Aim.FOV*2,
+			S.Aim.FOV*2
+		)
+
+		FOVCircle.Visible = S.Aim.Enabled
+		FOVStroke.Color = S.Aim.FOVColor
+
+		if not S.Aim.Enabled then
+			CurrentTarget = nil
+		else
+			if CurrentTarget then
+				local valid = ValidPlayer(CurrentTarget)
+
+				if not valid then
+					CurrentTarget = nil
 				end
-				
-				local highlight = HighlightStorage[player]
-				if not highlight then
-					highlight = Instance.new("Highlight")
-					highlight.Parent = char
-					HighlightStorage[player] = highlight
+			end
+
+			if not CurrentTarget then
+				CurrentTarget = FindTarget()
+			end
+
+			if CurrentTarget then
+				local part = GetPart(CurrentTarget.Character)
+
+				if part then
+					local desired = CFrame.lookAt(
+						Camera.CFrame.Position,
+						part.Position
+					)
+
+					Camera.CFrame = Camera.CFrame:Lerp(
+						desired,
+						math.clamp(S.Aim.Smoothness,.01,.82)
+					)
 				end
-				
-				highlight.FillColor = S.ESP.Rainbow and Color3.fromHSV(tick() % 5 / 5, 1, 1) or S.ESP.Color
-				highlight.OutlineColor = Color3.new(1,1,1)
-				highlight.FillTransparency = 0.5
-				highlight.OutlineTransparency = 0
-			else
-				if HighlightStorage[player] then
-					HighlightStorage[player]:Destroy()
-					HighlightStorage[player] = nil
+			end
+		end
+
+		for _,player in ipairs(Players:GetPlayers()) do
+			if player ~= LP then
+				if not ESPObjects[player] then
+					CreateESP(player)
+				end
+
+				UpdateESP(player,ESPObjects[player])
+			end
+		end
+
+		Main.BackgroundColor3 = S.UI.MenuColor
+		Top.BackgroundColor3 = S.UI.TopColor
+		Open.BackgroundColor3 = S.UI.ButtonColor
+
+		for _,page in pairs(Pages) do
+			for _,obj in ipairs(page:GetChildren()) do
+				if obj:IsA("TextButton") then
+					obj.BackgroundColor3 = S.UI.ButtonColor
 				end
 			end
 		end
 	end
-end)
+)
 
 Players.PlayerRemoving:Connect(function(player)
-	if HighlightStorage[player] then
-		HighlightStorage[player]:Destroy()
-		HighlightStorage[player] = nil
+	RemoveESP(player)
+
+	if CurrentTarget == player then
+		CurrentTarget = nil
 	end
 end)
 
+local dragging = false
+local dragStart
+local startPos
+
+Top.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = Main.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and (
+		input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch
+	) then
+		local delta = input.Position-dragStart
+
+		Main.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset+delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset+delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
+
+local openDragging = false
+local openStart
+local openPos
+
+Open.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		openDragging = true
+		openStart = input.Position
+		openPos = Open.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if openDragging and (
+		input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch
+	) then
+		local delta = input.Position-openStart
+
+		Open.Position = UDim2.new(
+			openPos.X.Scale,
+			openPos.X.Offset+delta.X,
+			openPos.Y.Scale,
+			openPos.Y.Offset+delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		openDragging = false
+	end
+end)
+
+SwitchPage("AIM")
